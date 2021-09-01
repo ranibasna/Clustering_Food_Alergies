@@ -1,0 +1,121 @@
+---
+title: "Removing Outliers"
+output: html_notebook
+---
+
+# removing rows
+
+```{r}
+food_data_2_removed <- food_data2[! rownames(food_data2) %in% rownames(k_outlier_uft$L), ]
+gower_food_removed <- daisy(food_data_2_removed, metric = "gower", type = list(ordratio = ordinal_columns_food, symm = symm_col_food, asymm = asymm_col_food))
+gower_food_mat_removed <- as.matrix(gower_food_removed)
+```
+
+- tsne for removed data with Gower
+```{r}
+set.seed(10)
+# Tsne for tree distacne
+tsne_Gower_food_removed <- Rtsne(X = gower_food_removed, is_distance = TRUE, perplexity = 50 , check_duplicates = FALSE)
+
+tsne_Gower_food_removed <- tsne_Gower_food_removed$Y %>%
+  data.frame() %>%
+  setNames(c("X", "Y"))
+
+ggplot(aes(x = X, y = Y), data = tsne_Gower_food_removed)  + geom_point()
+```
+
+
+```{r}
+h_gower_food_removed <- hcut(gower_food_removed,4, isdiss = TRUE)
+grp_gower_food_removed <- h_gower_food_removed$cluster
+table(grp_gower_food_removed)
+tsne_Gower_food_removed$cl <- factor(h_gower_food_removed$cluster)
+ggplot(tsne_Gower_food_removed, aes(x=X, y=Y, color=cl)) + geom_point()
+```
+
+```{r}
+#library(arsenal) # for presenting the tabels
+grp_hc_removed <- h_gower_food_removed$cluster
+result_food_hc_gower_removed <- food_data_2_removed
+result_food_hc_gower_removed$clusters <- grp_hc_removed
+result_food_hc_gower_removed$smoking2 <- as.factor(result_food_hc_gower_removed$smoking2)
+#result_food_hc_gower_removed$degreeurban <- as.factor(result_food_hc_gower_removed$degreeurban)
+table_hc_removed <- tableby(clusters ~ ., data = as.list(result_food_hc_gower_removed))
+summary(table_hc_removed, title = "Charachtaristcs of Clusters")  
+```
+
+
+## Bootstraped k-means on removed data UFT
+```{r}
+#library(fpc)
+set.seed(33)
+k_uft_boot_food_removed <- clusterboot(food_converted_removed_outlier, B = 30, bootmethod = "boot", clustermethod = kmeansCBI, krange = 4, seed = 22)
+grp_k_uft_food_removed <- k_uft_boot_food_removed$result$result$cluster
+table(grp_k_uft_food_removed)
+
+set.seed(10)
+tsne_converted_food_removed <- Rtsne(X = food_converted_removed_outlier ,perplexity= 30, is_distance = FALSE, check_duplicates = FALSE)
+
+tsne_converted_food_removed <- tsne_converted_food_removed$Y %>%
+  data.frame() %>%
+  setNames(c("X", "Y"))
+
+ggplot(aes(x = X, y = Y), data = tsne_converted_food_removed)  + geom_point()
+
+tsne_converted_food_removed$cl <- factor(grp_k_uft_food_removed)
+ggplot(tsne_converted_food_removed, aes(x=X, y=Y, color=cl)) + geom_point()
+```
+
+
+```{r}
+# using the k_means results on the UFT method
+grp_uft_removed_outliers <- grp_k_uft_food_removed
+#food_data_removed_outlier <- food_data[! rownames(food_data) %in% rownames(k_outlier_uft$L), ]
+food_data_removed_outlier <- food_data_2_removed
+result_food_uft_removed_outliers <- food_data_removed_outlier
+result_food_uft_removed_outliers$clusters <- grp_uft_removed_outliers
+result_food_uft_removed_outliers$smoking2 <- as.factor(result_food_uft_removed_outliers$smoking2)
+#result_food_uft_removed_outliers$degreeurban <- as.factor(result_food_uft_removed_outliers$degreeurban)
+table_DL <- tableby(clusters ~ ., data = as.list(result_food_uft_removed_outliers))
+summary(table_DL, title = "Charachtaristcs of Clusters")  
+```
+
+
+# tree_based distance
+```{r}
+food.tc_removed <- treeClust(food_data_2_removed, d.num = 4, control = treeClust.control(return.trees = TRUE, return.dists = TRUE))
+tree_d4_newdata_food_removed <- tcnewdata(food.tc_removed, d.num = 4)
+dice_food_tree_3_removed <- dice(tree_d4_newdata_food_removed, nk = 4, reps = 4, algorithms = c( "km","ap","pam"), distance = c("euclidean", "manhattan"), cons.funs = c("kmodes", "majority","CSPA", "LCE"), reweigh = FALSE,  trim = TRUE, n = 3, evaluate = TRUE, plot = TRUE)
+```
+
+
+
+```{r}
+grp_tree_removed <- dice_food_tree_3_removed$clusters[,3]
+result_food_tree_removed <- food_data_2_removed
+result_food_tree_removed$clusters <- grp_tree_removed
+result_food_tree_removed$smoking2 <- as.factor(result_food_tree_removed$smoking2)
+#result_food_tree_removed$degreeurban <- as.factor(result_food_tree_removed$degreeurban)
+table_tree_removed <- tableby(clusters ~ ., data = as.list(result_food_tree_removed))
+summary(table_tree_removed, title = "Charachtaristcs of Clusters")  
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

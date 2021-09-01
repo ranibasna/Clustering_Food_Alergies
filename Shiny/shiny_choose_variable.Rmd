@@ -1,0 +1,363 @@
+---
+title: "Clustering results food allergies"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    social: menu
+    source_code: embed
+runtime: shiny
+---
+
+```{r global, include=FALSE}
+# load data in 'global' chunk so it can be shared by all users of the dashboard
+library(tidyverse)
+library(ggplot2)
+library(plotly)
+library(rsconnect)
+#resultft_DEL_all <- read.csv('/Users/xbasra/Documents/Data/Clustering_Food_Alergies/Intermediate/Shiny_vis/resultft_DEL_all.csv')
+# load and process the all data
+resultft_DEL_all <- read.csv('resultft_DEL_all_id_5.csv')
+resultft_DEL_all$farmlive[resultft_DEL_all$farmlive == ""] <- NA
+resultft_DEL_all <-  resultft_DEL_all %>% replace_na (list(farmlive = 'no'))
+resultft_DEL_all$cluster <- as.factor(resultft_DEL_all$cluster)
+# change the names within cluster variables to cluster1, cluster2, cluster3, ...
+# this should be moved to the original folder
+library(plyr)
+resultft_DEL_all$cluster <-  plyr::revalue(resultft_DEL_all$cluster, c("0" = "cluster 1", "1" = "cluster 2", "2" = "cluster 3", "3" = "cluster 4", "4" = "cluster 5" ))
+
+# change the names of the variables
+# also possibly write a function for renaming the names
+colnames(resultft_DEL_all)[which(names(resultft_DEL_all) == "sIgE_f1")] <- "IgE_levels_to_egg_white"
+colnames(resultft_DEL_all)[which(names(resultft_DEL_all) == "sIgE_f2")] <- "IgE_levels_to_milk"
+colnames(resultft_DEL_all)[which(names(resultft_DEL_all) == "sIgE_f3")] <- "IgE_levels_to_fish_cod"
+colnames(resultft_DEL_all)[which(names(resultft_DEL_all) == "sIgE_f4")] <- "IgE_levels_to_wheat"
+colnames(resultft_DEL_all)[which(names(resultft_DEL_all) == "sIgE_f13")] <- "IgE_levels_to_peanut"
+colnames(resultft_DEL_all)[which(names(resultft_DEL_all) == "sIgE_f14")] <- "IgE_levels_to_soybean"
+colnames(resultft_DEL_all)[which(names(resultft_DEL_all) == "sIgE_f17")] <- "IgE_levels_to_hazelnut"
+colnames(resultft_DEL_all)[which(names(resultft_DEL_all) == "sIgE_f18")] <- "IgE_levels_to_brazilnut"
+colnames(resultft_DEL_all)[which(names(resultft_DEL_all) == "sIgE_f20")] <- "IgE_levels_to_almond"
+colnames(resultft_DEL_all)[which(names(resultft_DEL_all) == "sIgE_f36")] <- "IgE_levels_to_coconut"
+colnames(resultft_DEL_all)[which(names(resultft_DEL_all) == "bmi2")] <- "Body_mass_index"
+colnames(resultft_DEL_all)[which(names(resultft_DEL_all) == "age")] <- "Age"
+# drop ID coloumn
+drops <- c("X","ID")
+resultft_DEL_all <- resultft_DEL_all[ , !(names(resultft_DEL_all) %in% drops)]
+
+# Random data
+# load and process the random data
+#resultft_DEL_random <- read.csv("/Users/xbasra/Documents/Data/Clustering_Food_Alergies/Intermediate/CsvData_Output/result_rand_uft_DEL_k.csv")
+resultft_DEL_random <- read.csv('result_rand_uft_DEL_k.csv')
+#which(resultft_DEL_random$farmlive == "")
+resultft_DEL_random$farmlive[resultft_DEL_random$farmlive == ""] <- NA
+resultft_DEL_random <-  resultft_DEL_random %>% replace_na (list(farmlive = 'no'))
+resultft_DEL_random$cluster <- as.factor(resultft_DEL_random$cluster)
+# change the names within cluster variables to cluster1, cluster2, cluster3, ...
+# this should be moved to the original folder
+library(plyr)
+resultft_DEL_random$cluster <-  plyr::revalue(resultft_DEL_random$cluster, c("0" = "cluster 1", "1" = "cluster 2", "2" = "cluster 3", "3" = "cluster 4", "4" = "cluster 5" ))
+
+# change the names of the variables
+# also possibly write a function for renaming the names
+colnames(resultft_DEL_random)[which(names(resultft_DEL_random) == "sIgE_f1")] <- "IgE_levels_to_egg_white"
+colnames(resultft_DEL_random)[which(names(resultft_DEL_random) == "sIgE_f2")] <- "IgE_levels_to_milk"
+colnames(resultft_DEL_random)[which(names(resultft_DEL_random) == "sIgE_f3")] <- "IgE_levels_to_fish_cod"
+colnames(resultft_DEL_random)[which(names(resultft_DEL_random) == "sIgE_f4")] <- "IgE_levels_to_wheat"
+colnames(resultft_DEL_random)[which(names(resultft_DEL_random) == "sIgE_f13")] <- "IgE_levels_to_peanut"
+colnames(resultft_DEL_random)[which(names(resultft_DEL_random) == "sIgE_f14")] <- "IgE_levels_to_soybean"
+colnames(resultft_DEL_random)[which(names(resultft_DEL_random) == "sIgE_f17")] <- "IgE_levels_to_hazelnut"
+colnames(resultft_DEL_random)[which(names(resultft_DEL_random) == "sIgE_f18")] <- "IgE_levels_to_brazilnut"
+colnames(resultft_DEL_random)[which(names(resultft_DEL_random) == "sIgE_f20")] <- "IgE_levels_to_almond"
+colnames(resultft_DEL_random)[which(names(resultft_DEL_random) == "sIgE_f36")] <- "IgE_levels_to_coconut"
+colnames(resultft_DEL_random)[which(names(resultft_DEL_random) == "bmi2")] <- "Body_mass_index"
+colnames(resultft_DEL_random)[which(names(resultft_DEL_random) == "age")] <- "Age"
+# # drop ID coloumn
+# drops <- c("X","ID")
+# resultft_DEL_all <- resultft_DEL_all[ , !(names(resultft_DEL_all) %in% drops)]
+
+# with asthma/rhinites data
+# load and process the random data
+#resultft_DEL_random <- read.csv("/Users/xbasra/Documents/Data/Clustering_Food_Alergies/Intermediate/CsvData_Output/result_rand_uft_DEL_k.csv")
+result_as_rh_uft_DEL <- read.csv('result_as_rh_uft_DEL.csv')
+result_as_rh_uft_DEL$farmlive[result_as_rh_uft_DEL$farmlive == ""] <- NA
+result_as_rh_uft_DEL <-  result_as_rh_uft_DEL %>% replace_na (list(farmlive = 'no'))
+result_as_rh_uft_DEL$cluster <- as.factor(result_as_rh_uft_DEL$cluster)
+# change the names within cluster variables to cluster1, cluster2, cluster3, ...
+# this should be moved to the original folder
+library(plyr)
+result_as_rh_uft_DEL$cluster <-  plyr::revalue(result_as_rh_uft_DEL$cluster, c("0" = "cluster 1", "1" = "cluster 2", "2" = "cluster 3", "3" = "cluster 4", "4" = "cluster 5" ))
+
+# change the names of the variables
+# also possibly write a function for renaming the names
+colnames(result_as_rh_uft_DEL)[which(names(result_as_rh_uft_DEL) == "sIgE_f1")] <- "IgE_levels_to_egg_white"
+colnames(result_as_rh_uft_DEL)[which(names(result_as_rh_uft_DEL) == "sIgE_f2")] <- "IgE_levels_to_milk"
+colnames(result_as_rh_uft_DEL)[which(names(result_as_rh_uft_DEL) == "sIgE_f3")] <- "IgE_levels_to_fish_cod"
+colnames(result_as_rh_uft_DEL)[which(names(result_as_rh_uft_DEL) == "sIgE_f4")] <- "IgE_levels_to_wheat"
+colnames(result_as_rh_uft_DEL)[which(names(result_as_rh_uft_DEL) == "sIgE_f13")] <- "IgE_levels_to_peanut"
+colnames(result_as_rh_uft_DEL)[which(names(result_as_rh_uft_DEL) == "sIgE_f14")] <- "IgE_levels_to_soybean"
+colnames(result_as_rh_uft_DEL)[which(names(result_as_rh_uft_DEL) == "sIgE_f17")] <- "IgE_levels_to_hazelnut"
+colnames(result_as_rh_uft_DEL)[which(names(result_as_rh_uft_DEL) == "sIgE_f18")] <- "IgE_levels_to_brazilnut"
+colnames(result_as_rh_uft_DEL)[which(names(result_as_rh_uft_DEL) == "sIgE_f20")] <- "IgE_levels_to_almond"
+colnames(result_as_rh_uft_DEL)[which(names(result_as_rh_uft_DEL) == "sIgE_f36")] <- "IgE_levels_to_coconut"
+colnames(result_as_rh_uft_DEL)[which(names(result_as_rh_uft_DEL) == "bmi2")] <- "Body_mass_index"
+colnames(result_as_rh_uft_DEL)[which(names(result_as_rh_uft_DEL) == "age")] <- "Age"
+# # drop ID coloumn
+# drops <- c("X","ID")
+# resultft_DEL_all <- resultft_DEL_all[ , !(names(resultft_DEL_all) %in% drops)]
+
+# without asthma/rhinites data
+# load and process the random data
+#resultft_DEL_random <- read.csv("/Users/xbasra/Documents/Data/Clustering_Food_Alergies/Intermediate/CsvData_Output/result_rand_uft_DEL_k.csv")
+result_no_as_rh_uft_DEL <- read.csv('result_no_as_rh_uft_DEL.csv')
+result_no_as_rh_uft_DEL$farmlive[result_no_as_rh_uft_DEL$farmlive == ""] <- NA
+result_no_as_rh_uft_DEL <-  result_no_as_rh_uft_DEL %>% replace_na (list(farmlive = 'no'))
+result_no_as_rh_uft_DEL$cluster <- as.factor(result_no_as_rh_uft_DEL$cluster)
+# change the names within cluster variables to cluster1, cluster2, cluster3, ...
+# this should be moved to the original folder
+library(plyr)
+result_no_as_rh_uft_DEL$cluster <-  plyr::revalue(result_no_as_rh_uft_DEL$cluster, c("0" = "cluster 1", "1" = "cluster 2", "2" = "cluster 3", "3" = "cluster 4", "4" = "cluster 5" ))
+
+# change the names of the variables
+# also possibly write a function for renaming the names
+colnames(result_no_as_rh_uft_DEL)[which(names(result_no_as_rh_uft_DEL) == "sIgE_f1")] <- "IgE_levels_to_egg_white"
+colnames(result_no_as_rh_uft_DEL)[which(names(result_no_as_rh_uft_DEL) == "sIgE_f2")] <- "IgE_levels_to_milk"
+colnames(result_no_as_rh_uft_DEL)[which(names(result_no_as_rh_uft_DEL) == "sIgE_f3")] <- "IgE_levels_to_fish_cod"
+colnames(result_no_as_rh_uft_DEL)[which(names(result_no_as_rh_uft_DEL) == "sIgE_f4")] <- "IgE_levels_to_wheat"
+colnames(result_no_as_rh_uft_DEL)[which(names(result_no_as_rh_uft_DEL) == "sIgE_f13")] <- "IgE_levels_to_peanut"
+colnames(result_no_as_rh_uft_DEL)[which(names(result_no_as_rh_uft_DEL) == "sIgE_f14")] <- "IgE_levels_to_soybean"
+colnames(result_no_as_rh_uft_DEL)[which(names(result_no_as_rh_uft_DEL) == "sIgE_f17")] <- "IgE_levels_to_hazelnut"
+colnames(result_no_as_rh_uft_DEL)[which(names(result_no_as_rh_uft_DEL) == "sIgE_f18")] <- "IgE_levels_to_brazilnut"
+colnames(result_no_as_rh_uft_DEL)[which(names(result_no_as_rh_uft_DEL) == "sIgE_f20")] <- "IgE_levels_to_almond"
+colnames(result_no_as_rh_uft_DEL)[which(names(result_no_as_rh_uft_DEL) == "sIgE_f36")] <- "IgE_levels_to_coconut"
+colnames(result_no_as_rh_uft_DEL)[which(names(result_no_as_rh_uft_DEL) == "bmi2")] <- "Body_mass_index"
+colnames(result_no_as_rh_uft_DEL)[which(names(result_no_as_rh_uft_DEL) == "age")] <- "Age"
+# # drop ID coloumn
+# drops <- c("X","ID")
+# resultft_DEL_all <- resultft_DEL_all[ , !(names(resultft_DEL_all) %in% drops)]
+```
+
+<!-- Distribution plot -->
+<!-- ======================================================================= -->
+
+
+<!-- Column {.sidebar} -->
+<!-- ----------------------------------------------------------------------- -->
+
+<!-- ```{r} -->
+<!-- selectInput('col', 'Select Variable', names(resultft_DEL_all %>% select(- c('cluster','farmlive','family_allergy_hist','gender2')))) -->
+
+<!-- #selectInput('col', 'Select Variable', names(selectedData)) -->
+
+<!-- selectInput('fac', 'factor Variable', c('cluster','farmlive','family_allergy_hist','gender2')) -->
+
+<!-- #selectInput('ycol', 'Y Variable', names(iris),selected=names(iris)[[2]]) -->
+
+<!-- #numericInput('clusters', 'Cluster count', 3, -->
+<!-- #              min = 1, max = 9) -->
+<!-- ``` -->
+
+<!-- Row -->
+<!-- ----------------------------------------------------------------------- -->
+<!-- ### Distribution plot -->
+
+<!-- ```{r} -->
+<!-- # dataset <- reactive({ -->
+<!-- #    resultft_DEL_all %>% select(- age) -->
+<!-- # }) -->
+
+<!-- # renderPlotly({ -->
+<!-- #   g_dis <- ggplotly(dist_plot_clust(dataset(), input$col)) -->
+<!-- #   build <- plotly_build(print(g_dis)) -->
+<!-- #   build -->
+<!-- # }) -->
+
+
+<!-- renderPlotly({ -->
+<!--   #dataset <- resultft_DEL_all  -->
+<!--   g <- ggplot(resultft_DEL_all, aes_string(input$col)) -->
+<!--   g <- g + geom_density(aes_string(fill = input$fac), alpha=0.6)  -->
+<!--   ggplotly(g) -->
+<!-- }) -->
+<!-- ``` -->
+
+
+Distribution plot Random sample
+=======================================================================
+
+
+Column {.sidebar}
+-----------------------------------------------------------------------
+
+```{r}
+selectInput('col', 'Select Variable', names(resultft_DEL_random %>% select(- c('cluster','farmlive','family_allergy_hist','gender2'))))
+
+#selectInput('col', 'Select Variable', names(selectedData))
+
+selectInput('fac', 'factor Variable', c('cluster','farmlive','family_allergy_hist','gender2'))
+    
+#selectInput('ycol', 'Y Variable', names(iris),selected=names(iris)[[2]])
+    
+#numericInput('clusters', 'Cluster count', 3,
+#              min = 1, max = 9)
+```
+
+Row
+-----------------------------------------------------------------------
+### Distribution plot
+
+```{r}
+renderPlotly({
+  g <- ggplot(resultft_DEL_random, aes_string(input$col))
+  g <- g + geom_density(aes_string(fill = input$fac), alpha=0.6) 
+  ggplotly(g)
+})
+```
+
+Distribution plot with asthma or rhinitis
+=======================================================================
+
+
+Column {.sidebar}
+-----------------------------------------------------------------------
+
+```{r}
+selectInput('col2', 'Select Variable_2', names(result_as_rh_uft_DEL %>% select(- c('cluster','farmlive','family_allergy_hist','gender2'))))
+
+selectInput('fac2', 'factor Variable_2', c('cluster','farmlive','family_allergy_hist','gender2'))
+```
+
+Row
+-----------------------------------------------------------------------
+### Distribution plot
+
+```{r}
+renderPlotly({
+  g <- ggplot(result_as_rh_uft_DEL, aes_string(input$col2))
+  g <- g + geom_density(aes_string(fill = input$fac2), alpha=0.6) 
+  ggplotly(g)
+})
+```
+
+Distribution plot with No asthma or rhinitis
+=======================================================================
+
+
+Column {.sidebar}
+-----------------------------------------------------------------------
+
+```{r}
+selectInput('col3', 'Select Variable_3', names(result_no_as_rh_uft_DEL %>% select(- c('cluster','farmlive','family_allergy_hist','gender2'))))
+
+selectInput('fac3', 'factor Variable_3', c('cluster','farmlive','family_allergy_hist','gender2'))
+```
+
+Row
+-----------------------------------------------------------------------
+### Distribution plot
+
+```{r}
+renderPlotly({
+  g <- ggplot(result_no_as_rh_uft_DEL, aes_string(input$col3))
+  g <- g + geom_density(aes_string(fill = input$fac3), alpha=0.6) 
+  ggplotly(g)
+})
+```
+
+<!-- Distribution plot opposite -->
+<!-- ======================================================================= -->
+
+<!-- Column {.sidebar} -->
+<!-- ----------------------------------------------------------------------- -->
+
+<!-- ```{r} -->
+<!-- selectInput('col2', 'Select Variable', names(resultft_DEL_all %>% select(- c('cluster','farmlive','family_allergy_hist','gender2')))) -->
+
+<!-- #selectInput('col', 'Select Variable', names(selectedData)) -->
+
+<!-- selectInput('fac2', 'factor Variable', c('cluster','farmlive','family_allergy_hist','gender2')) -->
+
+<!-- #selectInput('ycol', 'Y Variable', names(iris),selected=names(iris)[[2]]) -->
+
+<!-- #numericInput('clusters', 'Cluster count', 3, -->
+<!-- #              min = 1, max = 9) -->
+<!-- ``` -->
+
+<!-- Row -->
+<!-- ----------------------------------------------------------------------- -->
+<!-- ### Distribution plot -->
+
+<!-- ```{r} -->
+<!-- renderPlotly({ -->
+<!--   #dataset <- resultft_DEL_all  -->
+<!--   g <- ggplot(resultft_DEL_all, aes_string(input$col2)) -->
+<!--   g <- g + geom_density(aes_string(fill = input$fac2), alpha=0.4) + coord_flip() -->
+<!--   ggplotly(g) -->
+<!-- }) -->
+
+<!-- ``` -->
+
+
+<!-- Histogram and Box plots -->
+<!-- ======================================================================= -->
+
+<!-- Column {.sidebar} -->
+<!-- ----------------------------------------------------------------------- -->
+<!-- ```{r} -->
+<!-- selectInput('col1', 'Select Variable', names(resultft_DEL_all %>% select(- c('cluster','farmlive','family_allergy_hist','gender2')))) -->
+<!-- selectInput('fac1', 'factor Variable', c('cluster','farmlive','family_allergy_hist','gender2')) -->
+<!-- ``` -->
+
+<!-- Row -->
+<!-- ----------------------------------------------------------------------- -->
+<!-- ### Histogram -->
+<!-- ```{r} -->
+<!-- renderPlotly({ -->
+<!-- s <- ggplot(resultft_DEL_all, aes_string(input$col1)) + scale_fill_brewer(palette = "Spectral")   -->
+<!-- s <- s + geom_histogram(aes_string(fill=input$fac1), bins=5, col="black", size=.1) +   # change number of bins -->
+<!--   labs(title="Histogram with Fixed Bins",  -->
+<!--        subtitle="Age across different clusters", -->
+<!--        x="Age", -->
+<!--          fill="Cluster")  -->
+<!-- ggplotly(s) -->
+<!-- }) -->
+<!-- ``` -->
+
+
+<!-- ### Box plot -->
+<!-- ```{r} -->
+<!-- renderPlotly({ -->
+<!--   l <- ggplot(resultft_DEL_all, aes_string(input$fac1, input$col1)) -->
+<!-- l <- l + geom_boxplot(aes_string(fill=input$fac1)) +  -->
+<!--   theme(axis.text.x = element_text(angle=65, vjust=0.6)) +  -->
+<!--   labs(title="Box plot",  -->
+<!--        subtitle="Age grouped by cluster of person", -->
+<!--        caption="Source: results of Hierarchical clustering with tree-based distance and distance d1", -->
+<!--        x="cluster of person", -->
+<!--        y="Age") -->
+<!-- ggplotly(l) -->
+<!-- }) -->
+<!-- ``` -->
+
+<!-- Categorical Variables -->
+<!-- ======================================================================= -->
+
+<!-- Column {.sidebar} -->
+<!-- ----------------------------------------------------------------------- -->
+<!-- ```{r} -->
+<!-- selectInput('var', 'categorical Variable', names(resultft_DEL_all %>% select( c('cluster','farmlive','family_allergy_hist','gender2')))) -->
+<!-- selectInput('fill', 'fill Variable', c('cluster','farmlive','family_allergy_hist','gender2')) -->
+<!-- ``` -->
+
+<!-- Row -->
+<!-- ----------------------------------------------------------------------- -->
+<!-- ```{r} -->
+<!-- renderPlotly({ -->
+<!--  #dataset_cat <- resultft_DEL_all %>% select(c("gender2","farmlive","family_allergy_hist")) -->
+<!-- k <- ggplot(resultft_DEL_all, aes_string(input$var, fill = input$fill )) +  geom_bar(position = "dodge2") -->
+<!-- ggplotly(k) -->
+<!-- }) -->
+<!-- ``` -->
+
+
+
+
+

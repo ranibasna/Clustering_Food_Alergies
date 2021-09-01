@@ -1,0 +1,65 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(igraph)
+```
+
+
+```{r}
+result_food_uft_DEL_k <- result_food_uft_DEL_k[,3:20]
+head(result_food_uft_DEL_k)
+```
+
+
+```{r}
+EDL_Embedding = read.csv('/Users/xbasra/Documents/Data/Clustering_Food_Alergies/CsvData/EDL_Embedding.csv')
+head(EDL_Embedding)
+```
+
+```{r}
+Em_corr <- cor(t(EDL_Embedding))
+Em_corr[Em_corr < 0.9995] <- 0
+network <- graph_from_adjacency_matrix( Em_corr, weighted=T, mode="undirected", diag=F)
+plot(network)
+```
+
+
+```{r}
+set.seed(10)
+#tsne_converted_food_DEL <- Rtsne(X = EDL_Embedding ,perplexity= 200, is_distance = FALSE, check_duplicates = FALSE)
+tsne_converted_food_DEL <- Rtsne(X = EDL_Embedding ,perplexity= 150, is_distance = FALSE, check_duplicates = FALSE)
+
+tsne_converted_food_DEL <- tsne_converted_food_DEL$Y %>%
+  data.frame() %>%
+  setNames(c("X", "Y"))
+
+tsne_converted_food_DEL$cl <- factor(result_food_uft_DEL_k$cluster)
+ggplot(tsne_converted_food_DEL, aes(x=X, y=Y, color=cl)) + geom_point()
+
+#ggplot(aes(x = X, y = Y), data = tsne_converted_food_DEL)  + geom_point()
+```
+
+```{r}
+library(plotly)
+#packageVersion('plotly')
+
+tsne_converted_food_DEL_3d <- Rtsne(X = EDL_Embedding ,perplexity= 150, dims = 3, is_distance = FALSE, check_duplicates = FALSE)
+
+tsne_converted_food_DEL_3d <- tsne_converted_food_DEL_3d$Y %>%
+  data.frame() %>%
+  setNames(c("X", "Y", "Z"))
+
+tsne_converted_food_DEL_3d$cl <- factor(result_food_uft_DEL_k$cluster)
+
+p <- plot_ly(tsne_converted_food_DEL_3d, x = ~X, y = ~Y, z = ~Z, color = ~cl, colors = c('#BF382A', '#0C4B8E')) %>%
+  add_markers() %>%
+  layout(scene = list(xaxis = list(title = 'Dim1'),
+                     yaxis = list(title = 'Dim2'),
+                     zaxis = list(title = 'Dim3')))
+p
+```
+
+

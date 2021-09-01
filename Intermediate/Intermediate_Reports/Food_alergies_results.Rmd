@@ -1,0 +1,284 @@
+---
+title: "Results food data clustering"
+output:
+  html_notebook: default
+  pdf_document: default
+---
+
+# Introduction
+
+```{r loadlib, include=FALSE}
+library(FactoMineR)
+library(factoextra)
+library(arsenal)
+library(plotly)
+```
+
+<!-- # Hierarchical Clustering on Gower distaacne with word linkage function. -->
+<!-- ```{r} -->
+<!-- #h_gower <- hcut(gower_food,5, isdiss = TRUE) -->
+<!-- fviz_dend(h_gower_food) -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- pp <- ggplot(tsne_Gower_food, aes(x=X, y=Y, color=cl)) + geom_point() -->
+<!-- ggplotly(pp) -->
+<!-- ``` -->
+
+
+<!-- ```{r} -->
+<!-- library(arsenal) # for presenting the tabels -->
+<!-- grp_hc <- h_gower_food$cluster -->
+<!-- result_food_hc_gower <- food_data -->
+<!-- result_food_hc_gower$clusters <- grp_hc -->
+<!-- #result_food_hc_gower$smoking2 <- as.factor(result_food_hc_gower$smoking2) -->
+<!-- #result_food_hc_gower$degreeurban <- as.factor(result_food_hc_gower$degreeurban) -->
+<!-- table_hc <- tableby(clusters ~ ., data = as.list(result_food_hc_gower)) -->
+<!-- summary(table_hc, title = "Charachtaristcs of Clusters")   -->
+<!-- # adding the id variable -->
+<!-- result_food_hc_gower$ID <- food_data_id$ID -->
+<!-- write.csv(result_food_hc_gower,'/Users/xbasra/Documents/Data/Clustering_Food_Alergies/CsvData/result_food_hc_gower.csv') -->
+<!-- ``` -->
+
+
+
+
+<!-- ## Charachtiristic Analysis -->
+<!-- ```{r, warning=FALSE} -->
+<!-- result_food_hc_gower$clusters <- as.factor(result_food_hc_gower$clusters) -->
+<!-- catdes(result_food_hc_gower, 16) -->
+<!-- ``` -->
+
+<!-- ## HDBSCAN_Gower_tsne -->
+<!-- ```{r} -->
+<!-- tsne_Gower_food$cl <- factor(hdb_gower_food$cluster) -->
+<!-- qq <- ggplot(tsne_Gower_food, aes(x=X, y=Y, color=cl)) + geom_point() -->
+<!-- ggplotly(qq) -->
+
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- library(arsenal) # for presenting the tabels -->
+<!-- grp_hc_db <- hdb_gower_food$cluster -->
+<!-- result_food_hc_db_gower <- food_data -->
+<!-- result_food_hc_db_gower$clusters <- grp_hc_db -->
+<!-- #result_food_hc_gower$smoking2 <- as.factor(result_food_hc_gower$smoking2) -->
+<!-- #result_food_hc_gower$degreeurban <- as.factor(result_food_hc_gower$degreeurban) -->
+<!-- table_hc_db <- tableby(clusters ~ ., data = as.list(result_food_hc_db_gower)) -->
+<!-- summary(table_hc_db, title = "Charachtaristcs of Clusters")   -->
+<!-- # adding the id variable -->
+<!-- result_food_hc_db_gower$ID <- food_data_id$ID -->
+<!-- write.csv(result_food_hc_db_gower,'/Users/xbasra/Documents/Data/Clustering_Food_Alergies/CsvData/result_food_hc_db_gower.csv') -->
+<!-- ``` -->
+
+<!-- # Factor analysis on mixed data results -->
+
+<!-- ```{r} -->
+<!-- library(arsenal) # for presenting the tabels -->
+<!-- result_food_hc_famd <- food_data -->
+<!-- result_food_hc_famd$clusters <- grp_k_famd -->
+<!-- result_food_hc_famd$smoking2 <- as.factor(result_food_hc_famd$smoking2) -->
+<!-- result_food_hc_famd$degreeurban <- as.factor(result_food_hc_famd$degreeurban) -->
+<!-- table_hc <- tableby(clusters ~ ., data = as.list(result_food_hc_famd)) -->
+<!-- summary(table_hc, title = "Charachtaristcs of Clusters")   -->
+<!-- ``` -->
+
+
+
+<!-- ## Charachtiristic Analysis -->
+<!-- ```{r, warning=FALSE} -->
+<!-- result_food_hc_famd$clusters <- as.factor(result_food_hc_famd$clusters) -->
+<!-- catdes(result_food_hc_famd, 22) -->
+<!-- ``` -->
+
+<!-- # The tree based approach results -->
+
+<!-- - Tsne plot -->
+
+<!-- ```{r} -->
+<!-- ggplot(tsne_tree_distance_food, aes(x=X, y=Y, color=cl)) + geom_point() -->
+<!-- ``` -->
+
+
+<!-- ```{r} -->
+<!-- # using the k_means results -->
+<!-- #grp_tree <- h_tree_ward_8$cluster -->
+<!-- #grp_tree <- k_tree_8$cluster -->
+<!-- grp_tree <- dice_food_tree_3$clusters[,3] -->
+<!-- result_food_tree <- food_data -->
+<!-- result_food_tree$clusters <- grp_tree -->
+<!-- result_food_tree$smoking2 <- as.factor(result_food_tree$smoking2) -->
+<!-- #result_food_tree$degreeurban <- as.factor(result_food_tree$degreeurban) -->
+<!-- table_tree <- tableby(clusters ~ ., data = as.list(result_food_tree)) -->
+<!-- summary(table_tree, title = "Charachtaristcs of Clusters")   -->
+<!-- #write.csv(result_Airway_tree,'/Users/xbasra/Documents/Data/Clustering/Results_Data_Reports/CsvData/result_airway_tree.csv') -->
+<!-- ``` -->
+
+
+
+
+<!-- ## Charachtiristic Analysis -->
+<!-- ```{r, warning=FALSE} -->
+<!-- result_food_tree$clusters <- as.factor(result_food_tree$clusters) -->
+<!-- catdes(result_food_tree, 20) -->
+<!-- ``` -->
+
+
+
+
+<!-- ```{r} -->
+<!-- grp_tree_2 <- grp_k_tree_food_d2 -->
+<!-- result_food_tree_d2 <- food_data2 -->
+<!-- result_food_tree_d2$clusters <- grp_tree_2 -->
+<!-- result_food_tree_d2$smoking2 <- as.factor(result_food_tree_d2$smoking2) -->
+<!-- #result_food_tree_d2$degreeurban <- as.factor(result_food_tree_d2$degreeurban) -->
+<!-- table_tree_d2 <- tableby(clusters ~ ., data = as.list(result_food_tree_d2)) -->
+<!-- summary(table_tree_d2, title = "Charachtaristcs of Clusters")   -->
+<!-- #write.csv(result_Airway_tree,'/Users/xbasra/Documents/Data/Clustering/Results_Data_Reports/CsvData/result_airway_tree.csv') -->
+<!-- ``` -->
+
+
+
+<!-- # UFT method -->
+
+<!-- - Tsne plot -->
+<!-- ```{r} -->
+<!-- ggplot(tsne_converted_food, aes(x=X, y=Y, color=cl)) + geom_point() -->
+<!-- ``` -->
+
+
+<!-- ```{r} -->
+<!-- # using the k_means results on the UFT method -->
+<!-- grp_uft <- grp_k_converted_food -->
+<!-- result_food_uft <- food_data -->
+<!-- result_food_uft$clusters <- grp_uft -->
+<!-- #result_food_uft$smoking2 <- as.factor(result_food_uft$smoking2) -->
+<!-- #result_food_uft$degreeurban <- as.factor(result_food_uft$degreeurban) -->
+<!-- table_uft_food <- tableby(clusters ~ ., data = as.list(result_food_uft)) -->
+<!-- summary(table_uft_food, title = "Charachtaristcs of Clusters") -->
+<!-- write.csv(result_food_uft,'/Users/xbasra/Documents/Data/Clustering_Food_Alergies/CsvData/result_food_uft.csv') -->
+<!-- ``` -->
+
+
+
+<!-- ## Charachtiristic Analysis -->
+<!-- ```{r, warning=FALSE} -->
+<!-- result_food_uft$clusters <- as.factor(result_food_uft$clusters) -->
+<!-- catdes(result_food_uft, 17) -->
+<!-- ``` -->
+
+# All Data clusters
+
+## Deep learning, n2d (autoencoder + umap + kmeans)
+
+
+![](N2D_All_Clusters.PNG)
+
+
+```{r}
+result_food_uft_aut_umap_k <- read.csv('/Users/xbasra/Documents/Data/Clustering_Food_Alergies/CsvData_Output/result_food_uft_aut_umap_k.csv')
+table_uft_umap_aut_k <- tableby(cluster ~ ., data = as.list(result_food_uft_aut_umap_k))
+summary(table_uft_umap_aut_k, title = "Charachtaristcs of Clusters")
+```
+
+
+
+## Charachtiristic Analysis
+```{r, warning=FALSE}
+result_food_uft_aut_umap_k$cluster <- as.factor(result_food_uft_aut_umap_k$cluster)
+catdes(result_food_uft_aut_umap_k, 16)
+```
+
+## Deep learning, DEL (Deep Embedding layer)
+
+```{r}
+result_food_uft_DEL_k <- read.csv('/Users/xbasra/Documents/Data/Clustering_Food_Alergies/CsvData_Output/result_food_uft_DEL_k.csv')
+#tsne_converted_food$cl_DEL <- factor(result_food_uft_DEL_k$cluster)
+#tsne_converted_food$n2d <- factor(result_food_uft_aut_umap_k$cluster)
+ggplot(tsne_converted_food, aes(x=X, y=Y, color=n2d)) + geom_point()
+```
+
+
+```{r}
+
+#result_food_uft_DEL_k <- result_food_uft_DEL_k[,3:20]
+table_uft_DEL_k <- tableby(cluster ~ ., data = as.list(result_food_uft_DEL_k))
+summary(table_uft_DEL_k, title = "Charachtaristcs of Clusters")
+# adding the id variable 
+#result_food_uft_DEL_k$ID <- food_data_id$ID 
+#write.csv(result_food_uft_DEL_k, "/Users/xbasra/Documents/Data/Clustering_Food_Alergies/CsvData/result_food_uft_DEL_k.csv")
+```
+
+## Charachtiristic Analysis
+```{r, warning=FALSE}
+result_food_uft_DEL_k$cluster <- as.factor(result_food_uft_DEL_k$cluster)
+#result_food_uft_DEL_k <- result_food_uft_DEL_k[-c(1,2,20)]
+catdes(result_food_uft_DEL_k, 16)
+```
+
+<!-- # Random Forest -->
+
+<!-- ```{r} -->
+<!-- # using the k_means results on the UFT method -->
+<!-- grp_rf <- food2.k.6$clustering -->
+<!-- result_food_rf <- food_data -->
+<!-- result_food_rf$clusters <- grp_rf -->
+<!-- result_food_rf$smoking2 <- as.factor(result_food_rf$smoking2) -->
+<!-- result_food_rf$degreeurban <- as.factor(result_food_rf$degreeurban) -->
+<!-- table_DL <- tableby(clusters ~ ., data = as.list(result_food_rf)) -->
+<!-- summary(table_DL, title = "Charachtaristcs of Clusters")   -->
+<!-- ``` -->
+
+
+
+
+<!-- ## Charachtiristic Analysis -->
+<!-- ```{r, warning=FALSE} -->
+<!-- result_food_rf$clusters <- as.factor(result_food_rf$clusters) -->
+<!-- catdes(result_food_rf, 22) -->
+<!-- ``` -->
+
+
+# Random Data clusters
+
+## Deep learning, n2d (autoencoder + umap + kmeans)
+
+
+![](N2D_random_clusters.PNG)
+
+
+```{r}
+result_rand_food_uft_aut_umap_k <- read.csv('/Users/xbasra/Documents/Data/Clustering_Food_Alergies/CsvData_Output/result_rand_food_uft_aut_umap_k.csv')
+table_rand_uft_umap_aut_k <- tableby(cluster ~ ., data = as.list(result_rand_food_uft_aut_umap_k))
+summary(table_rand_uft_umap_aut_k, title = "Charachtaristcs of Clusters")
+```
+
+## Charachtiristic Analysis
+```{r, warning=FALSE}
+result_rand_food_uft_aut_umap_k$cluster <- as.factor(result_rand_food_uft_aut_umap_k$cluster)
+catdes(result_rand_food_uft_aut_umap_k, 16)
+```
+
+## Deep learning, DEL (Deep Embedding layer)
+
+
+```{r}
+result_rand_food_uft_DEL_k <- read.csv('/Users/xbasra/Documents/Data/Clustering_Food_Alergies/CsvData_Output/result_rand_food_uft_DEL_k.csv')
+table_rand_uft_DEL_k <- tableby(cluster ~ ., data = as.list(result_rand_food_uft_DEL_k))
+summary(table_rand_uft_DEL_k, title = "Charachtaristcs of Clusters")
+# adding the id variable 
+#result_food_uft_DEL_k$ID <- food_data_id$ID 
+#write.csv(result_food_uft_DEL_k, "/Users/xbasra/Documents/Data/Clustering_Food_Alergies/CsvData/result_food_uft_DEL_k.csv")
+```
+
+## Charachtiristic Analysis
+```{r, warning=FALSE}
+result_rand_food_uft_DEL_k$cluster <- as.factor(result_rand_food_uft_DEL_k$cluster)
+#result_food_uft_DEL_k <- result_food_uft_DEL_k[-c(1,2,20)]
+catdes(result_rand_food_uft_DEL_k, 16)
+```
+
+
+
+
+

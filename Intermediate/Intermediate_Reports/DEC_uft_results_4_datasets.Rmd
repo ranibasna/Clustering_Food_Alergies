@@ -1,0 +1,223 @@
+---
+title: "Results food data clustering DEL"
+output:
+  html_notebook: default
+  pdf_document: default
+---
+
+```{r loadlib, include=FALSE}
+library(FactoMineR)
+library(factoextra)
+library(arsenal)
+library(Rtsne)
+library(plotly)
+library(tidyverse)
+```
+
+# All Data clusters (Deep learning, DEL (Deep Embedding Clustering layer))
+
+```{r}
+DEC_Embedding = read.csv('/Users/xbasra/Documents/Data/Clustering_Food_Alergies/Intermediate/CsvData_Output/DEC_Embedding.csv')
+head(DEC_Embedding)
+```
+
+```{r}
+set.seed(10)
+#tsne_converted_food_DEL <- Rtsne(X = EDL_Embedding ,perplexity= 200, is_distance = FALSE, check_duplicates = FALSE)
+tsne_converted_food_DEC <- Rtsne(X = DEC_Embedding ,perplexity= 150, is_distance = FALSE, check_duplicates = FALSE)
+
+tsne_converted_food_DEC <- tsne_converted_food_DEC$Y %>%
+  data.frame() %>%
+  setNames(c("X", "Y"))
+
+tsne_converted_food_DEC$cl <- factor(resultft_DEL_all$cluster)
+ggplot(tsne_converted_food_DEC, aes(x=X, y=Y, color=cl)) + geom_point()
+
+#ggplot(aes(x = X, y = Y), data = tsne_converted_food_DEC)  + geom_point()
+```
+
+```{r}
+tsne_converted_food_DEC_3d <- Rtsne(X = DEC_Embedding ,perplexity= 150, dims = 3, is_distance = FALSE, check_duplicates = FALSE)
+
+tsne_converted_food_DEC_3d <- tsne_converted_food_DEC_3d$Y %>%
+  data.frame() %>%
+  setNames(c("X", "Y", "Z"))
+
+tsne_converted_food_DEC_3d$cl <- factor(resultft_DEL_all$cluster)
+
+p <- plot_ly(tsne_converted_food_DEC_3d, x = ~X, y = ~Y, z = ~Z, color = ~cl, colors = c('#BF382A', '#0C4B8E')) %>%
+  add_markers() %>%
+  layout(scene = list(xaxis = list(title = 'Dim1'),
+                     yaxis = list(title = 'Dim2'),
+                     zaxis = list(title = 'Dim3')))
+p
+```
+
+```{r}
+resultft_DEL_all <- read.csv('/Users/xbasra/Documents/Data/Clustering_Food_Alergies/Intermediate/CsvData_Output/resultft_DEL_all.csv')
+# replacing the empty space "" values with no as done in the main analysis file
+resultft_DEL_all$farmlive[resultft_DEL_all$farmlive == ""] <- NA
+resultft_DEL_all <-  resultft_DEL_all %>% replace_na (list(farmlive = 'no'))
+#tsne_converted_food$cl_DEL <- factor(resultft_DEL_all$cluster)
+#ggplot(tsne_converted_food, aes(x=X, y=Y, color=cl_DEL)) + geom_point()
+resultft_DEL_all$cluster <- as.factor(resultft_DEL_all$cluster)
+```
+
+```{r}
+dist_plot_clust <-function(original_data, selected_variable){
+  selected_variable <- enquo(selected_variable)
+  ggplot(original_data, aes(UQ(selected_variable))) + geom_density(aes(fill = factor(cluster)), alpha=0.8) +
+    labs(title = "Density plot",
+         subtitle="sIgE_f1 of persons Grouped by Clusters",
+         caption="Source: Source: results of Hierarchical clustering with tree-based distance and distance d1",
+         x="sIgE_f1",
+         fill="# Clusters")
+} 
+```
+
+```{r}
+dist_plot_clust(original_data = resultft_DEL_all, selected_variable = age)
+```
+
+
+### Density plot shoiwing the age distribution for each cluster
+```{r}
+resultft_DEL_all$cluster <- as.factor(resultft_DEL_all$cluster)
+
+age_g <- ggplot(resultft_DEL_all, aes(sIgE_f3))
+age_p <- age_g + geom_density(aes(fill=factor(cluster)), alpha=0.8) +
+    labs(title="Density plot",
+         subtitle="sIgE_f1 of persons Grouped by Clusters",
+         caption="Source: Source: results of Hierarchical clustering with tree-based distance and distance d1",
+         x="sIgE_f1",
+         fill="# Clusters")
+
+ggplotly(age_p)
+```
+
+
+```{r}
+g <- ggplot(resultft_DEL_all, aes(bmi2)) + scale_fill_brewer(palette = "Spectral")
+s <- g + geom_histogram(aes(fill=factor(cluster)), 
+                   bins=5, 
+                   col="black", 
+                   size=.1) +   # change number of bins
+  labs(title="Histogram with Fixed Bins", 
+       subtitle="Age across different clusters",
+       x="Age",
+         fill="# Clusters") 
+
+ggplotly(s)
+```
+
+```{r}
+table_uft_DEL_all <- tableby(cluster ~ ., data = as.list(resultft_DEL_all))
+summary(table_uft_DEL_all, title = "Charachtaristcs of Clusters")
+# adding the id variable 
+#result_food_uft_DEL_k$ID <- food_data_id$ID 
+#write.csv(result_food_uft_DEL_k, "/Users/xbasra/Documents/Data/Clustering_Food_Alergies/CsvData/result_food_uft_DEL_k.csv")
+```
+
+
+
+## Charachtiristic Analysis
+```{r, warning=FALSE}
+resultft_DEL_all$cluster <- as.factor(resultft_DEL_all$cluster)
+catdes(resultft_DEL_all, 16)
+```
+
+
+
+# Random Data clusters with DEL (Deep Embedding Clustering layer)
+
+```{r}
+#result_rand_uft_DEL_k <- read.csv("/Users/xbasra/Documents/Data/Clustering_Food_Alergies/Intermediate/CsvData_Output/result_rand_food_uft_DEL_k.csv")
+result_rand_uft_DEL_k <- read.csv("/Users/xbasra/Documents/Data/Clustering_Food_Alergies/Intermediate/CsvData_Output/result_rand_uft_DEL_k.csv")
+result_rand_uft_DEL_k$farmlive[result_rand_uft_DEL_k$farmlive == ""] <- NA
+result_rand_uft_DEL_k <-  result_rand_uft_DEL_k %>% replace_na (list(farmlive = 'no'))
+table_rand_uft_DEL_k <- tableby(cluster ~ ., data = as.list(result_rand_uft_DEL_k))
+summary(table_rand_uft_DEL_k, title = "Charachtaristcs of Clusters")
+# adding the id variable 
+#result_food_uft_DEL_k$ID <- food_data_id$ID 
+#write.csv(result_food_uft_DEL_k, "/Users/xbasra/Documents/Data/Clustering_Food_Alergies/CsvData/result_food_uft_DEL_k.csv")
+```
+
+## Charachtiristic Analysis
+```{r, warning=FALSE}
+result_rand_uft_DEL_k$cluster <- as.factor(result_rand_uft_DEL_k$cluster)
+#result_food_uft_DEL_k <- result_food_uft_DEL_k[-c(1,2,20)]
+catdes(result_rand_uft_DEL_k, 16)
+```
+
+# With asthma and Rhinitis Data clusters with DEL (Deep Embedding Clustering layer)
+
+```{r}
+result_as_rh_uft_DEL <- read.csv('/Users/xbasra/Documents/Data/Clustering_Food_Alergies/Intermediate/CsvData_Output/result_as_rh_uft_DEL.csv')
+result_as_rh_uft_DEL$farmlive[result_as_rh_uft_DEL$farmlive == ""] <- NA
+result_as_rh_uft_DEL <-  result_as_rh_uft_DEL %>% replace_na (list(farmlive = 'no'))
+table_as_rh_uft_DEL <- tableby(cluster ~ ., data = as.list(result_as_rh_uft_DEL))
+summary(table_as_rh_uft_DEL, title = "Charachtaristcs of Clusters")
+# adding the id variable 
+#result_food_uft_DEL_k$ID <- food_data_id$ID 
+#write.csv(result_food_uft_DEL_k, "/Users/xbasra/Documents/Data/Clustering_Food_Alergies/CsvData/result_food_uft_DEL_k.csv")
+```
+
+## Charachtiristic Analysis
+```{r, warning=FALSE}
+result_as_rh_uft_DEL$cluster <- as.factor(result_as_rh_uft_DEL$cluster)
+catdes(result_as_rh_uft_DEL, 16)
+```
+
+
+# Without asthma and Rhinitis Data clusters with DEL (Deep Embedding Clustering layer)
+
+```{r}
+result_no_as_rh_uft_DEL <- read.csv('/Users/xbasra/Documents/Data/Clustering_Food_Alergies/Intermediate/CsvData_Output/result_no_as_rh_uft_DEL.csv')
+result_no_as_rh_uft_DEL$farmlive[result_no_as_rh_uft_DEL$farmlive == ""] <- NA
+result_no_as_rh_uft_DEL <-  result_no_as_rh_uft_DEL %>% replace_na (list(farmlive = 'no'))
+table_no_as_rh_uft_DEL <- tableby(cluster ~ ., data = as.list(result_no_as_rh_uft_DEL))
+summary(table_no_as_rh_uft_DEL, title = "Charachtaristcs of Clusters")
+# adding the id variable 
+#result_food_uft_DEL_k$ID <- food_data_id$ID 
+#write.csv(result_food_uft_DEL_k, "/Users/xbasra/Documents/Data/Clustering_Food_Alergies/CsvData/result_food_uft_DEL_k.csv")
+```
+
+## Charachtiristic Analysis
+```{r, warning=FALSE}
+result_no_as_rh_uft_DEL$cluster <- as.factor(result_no_as_rh_uft_DEL$cluster)
+catdes(result_no_as_rh_uft_DEL, 16)
+```
+
+
+
+
+# adding the id varaible
+```{r}
+resultft_DEL_all$ID <- food_data_id$ID
+result_rand_uft_DEL_k$ID <- rand_food_data_id$ID
+result_as_rh_uft_DEL$ID <- as_ri_food_id$ID
+result_no_as_rh_uft_DEL$ID <- no_as_ri_food_id$ID
+write.csv(resultft_DEL_all,'/Users/xbasra/Documents/Data/Clustering_Food_Alergies/Results/CSVData/resultft_DEL_all_id.csv')
+write.csv(result_rand_uft_DEL_k,'/Users/xbasra/Documents/Data/Clustering_Food_Alergies/Results/CSVData/result_rand_uft_DEL_k_id.csv')
+write.csv(result_as_rh_uft_DEL,'/Users/xbasra/Documents/Data/Clustering_Food_Alergies/Results/CSVData/result_as_rh_uft_DEL_id.csv')
+write.csv(result_no_as_rh_uft_DEL,'/Users/xbasra/Documents/Data/Clustering_Food_Alergies/Results/CSVData/result_no_as_rh_uft_DEL_id.csv')
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

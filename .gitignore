@@ -1,0 +1,14 @@
+# Ignore these directories:
+Intermediate/Shiny_vis
+Intermediate/Preprocessed_data
+Intermediate/CsvData_Output
+
+Shiny/result_as_rh_uft_DEL.csv
+Shiny/result_no_as_rh_uft_DEL.csv
+Shiny/result_rand_uft_DEL_k.csv
+Shiny/resultft_DEL_all_id_5.csv
+Shiny/resultft_DEL_all.csv
+
+
+ignore these files
+lsDockerfile_singularity

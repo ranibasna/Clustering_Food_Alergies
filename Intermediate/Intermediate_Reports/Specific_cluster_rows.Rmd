@@ -1,0 +1,50 @@
+---
+title: "Results"
+output:
+  html_notebook: default
+  pdf_document: default
+---
+
+
+# Cluster 2 with 5 subjects
+
+```{r}
+result_food_uft[result_food_uft$clusters == 2,]
+```
+
+
+# Cluster 5 with 5 subjects
+
+```{r}
+result_food_uft[result_food_uft$clusters == 5,]
+```
+
+
+# Bootstraped k-means on UFT with 4 clusters with tsne plot
+```{r}
+#library(fpc)
+set.seed(33)
+k_uft_boot_food_4 <- clusterboot(food_converted, B = 20, bootmethod = "boot", clustermethod = kmeansCBI, krange = 4, seed = 22)
+grp_k_uft_food_4 <- k_uft_boot_food_4$result$result$cluster
+table(grp_k_uft_food_4)
+tsne_converted_food$cl <- factor(grp_k_uft_food_4)
+ggplot(tsne_converted_food, aes(x=X, y=Y, color=cl)) + geom_point()
+```
+
+<!-- ```{r} -->
+<!-- table(grp_k_uft_food_4) -->
+<!-- ``` -->
+
+
+
+```{r}
+# using the k_means results on the UFT method
+grp_uft_4 <- grp_k_uft_food_4
+result_food_uft_4 <- food_data
+result_food_uft_4$clusters <- grp_uft_4
+result_food_uft_4$smoking2 <- as.factor(result_food_uft_4$smoking2)
+#result_food_uft_4$degreeurban <- as.factor(result_food_uft_4$degreeurban)
+table_DL <- tableby(clusters ~ ., data = as.list(result_food_uft_4))
+summary(table_DL, title = "Charachtaristcs of Clusters")  
+```
+
